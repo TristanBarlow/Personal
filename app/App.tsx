@@ -1,12 +1,25 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Modal, Button } from 'react-native';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-    </View>
-  );
+interface State {
+  showModal: boolean
+}
+export default class App extends React.Component<{}, State> {
+  state: State = { showModal: false }
+
+  render() {
+    return (
+      <View style={styles.container} >
+        <Text >Open up App.tsx to start gg on your!</Text>
+        <Button title="Show Modal" onPress={() => this.setState({ showModal: true })}>
+        </Button>
+        <Modal visible={this.state.showModal}>
+          <Text>foo</Text>
+          <Button title="Hide Modal" onPress={() => this.setState({ showModal: false })} />
+        </Modal>
+      </View>
+    )
+  }
 }
 
 const styles = StyleSheet.create({
@@ -16,4 +29,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+})
