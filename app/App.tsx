@@ -1,5 +1,9 @@
-import React from 'react';
-import { StyleSheet, Text, View, Modal, Button } from 'react-native';
+import React from 'react'
+import { } from '@react-navigation/native'
+import { StyleSheet } from 'react-native'
+import { NavigationContainer } from '@react-navigation/native'
+import Home from './src/pages/Home'
+import Stack from './src/Stack'
 
 interface State {
   showModal: boolean
@@ -9,15 +13,11 @@ export default class App extends React.Component<{}, State> {
 
   render() {
     return (
-      <View style={styles.container} >
-        <Text >Open up App.tsx to start gg on your!</Text>
-        <Button title="Show Modal" onPress={() => this.setState({ showModal: true })}>
-        </Button>
-        <Modal visible={this.state.showModal}>
-          <Text>foo</Text>
-          <Button title="Hide Modal" onPress={() => this.setState({ showModal: false })} />
-        </Modal>
-      </View>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Home" component={Home} />
+        </Stack.Navigator>
+      </NavigationContainer>
     )
   }
 }
