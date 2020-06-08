@@ -18,19 +18,22 @@ fn try_guess(correct: &str, tries: i8) -> i8 {
 }
 
 fn main() {
-    let words: Vec<&str> = vec!["foo", "bar", "char", "shit"];
+    let words: Vec<&str> = vec!["foo", "bar", "char", "tar"];
 
     let mut rng = rand::thread_rng();
 
+    let mut potential_words = String::from("");
+
     for a in &words {
-        println!("{}", a);
+        potential_words.push_str(&format!(" {} ", &a));
     }
 
-    let x = rand::Rng::gen_range(&mut rng, 0, words.len());
-    let right_word = words[x];
+    println!("Potential guesses are: {}", potential_words);
+    let word_index = rand::Rng::gen_range(&mut rng, 0, words.len());
+    let right_word = words[word_index];
 
-    let i: i8 = 0;
-    let guesses = try_guess(right_word, i);
+    let guesses = try_guess(right_word, 0);
     println!("CORRECT!");
-    println!("IT TOOK YOU {} GUEESES", guesses);
+    let b = if guesses == 1 { "guess" } else { "guesses" };
+    println!("IT TOOK YOU {} {}", guesses, b);
 }
