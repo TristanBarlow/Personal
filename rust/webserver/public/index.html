@@ -3,7 +3,12 @@
 </div>
 
 <script>
+  const data = []
+  for (let i = 0; i < 1000; i++) {
+    data.push("Big data".push(i))
+  }
   fetch('/foobar', {
-    method: 'POST'
+    method: 'POST',
+    body: JSON.stringify(data)
   })
 </script>

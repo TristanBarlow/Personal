@@ -1,7 +1,6 @@
 use std::fs;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::io::Cursor;
 use std::net::TcpListener;
 use std::net::TcpStream;
 
@@ -19,12 +18,20 @@ fn main() {
 
 fn handle_connection(mut stream: TcpStream, html: &String) {
     let mut request = String::new();
-    let mut b = BufReader::new(&stream);
+    let b = BufReader::new(&stream);
 
-    while !b.read_line(&mut request).is_ok() {}
+    for line in b.lines() {
+        let val = line.expect("Bad line");
+        if val == "" {
+            break;
+        }
+        request.push_str(&val);
+    }
+
     println!("{}", request);
     let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", html);
 
+    println!("WRITING RESPONSE");
     stream.write_all(response.as_bytes()).unwrap();
     stream.flush().unwrap();
 }
