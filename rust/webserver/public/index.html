@@ -5,10 +5,11 @@
 <script>
   const data = []
   for (let i = 0; i < 1000; i++) {
-    data.push("Big data".push(i))
+    data.push("Big data")
+    fetch('/foobar', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }).then(console.log).catch(console.error)
   }
-  fetch('/foobar', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  })
+
 </script>

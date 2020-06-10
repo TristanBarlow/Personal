@@ -18,14 +18,15 @@ fn main() {
 
 fn handle_connection(mut stream: TcpStream, html: &String) {
     let mut request = String::new();
-    let b = BufReader::new(&stream);
+    let mut b = BufReader::new(&stream);
 
-    for line in b.lines() {
-        let val = line.expect("Bad line");
-        if val == "" {
+    loop {
+        let mut line = String::new();
+        b.read_line(&mut line).expect("Could not read line");
+        if line == "\r\n" || line == "\n\r" {
+            println!("Finished reading request");
             break;
         }
-        request.push_str(&val);
     }
 
     println!("{}", request);
