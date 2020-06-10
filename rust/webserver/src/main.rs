@@ -1,18 +1,33 @@
+use futures::executor::block_on;
 use std::fs;
+use std::future::Future;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpListener;
 use std::net::TcpStream;
+use std::sync::mpsc;
+use std::thread;
 
 fn main() {
     let listener = TcpListener::bind("localhost:7878").unwrap();
-
     let html = fs::read_to_string("public/index.html").unwrap();
-    for stream in listener.incoming() {
-        let stream = stream.unwrap();
+    let (tx, rx): (mpsc::Sender<TcpStream>, mpsc::Receiver<TcpStream>) = mpsc::channel();
 
-        handle_connection(stream, &html);
-        println!("Connection established!");
+    thread::spawn(move || {
+        println!("Started processor thread");
+        let mut count = 0;
+        loop {
+            let mut stream = rx.recv().unwrap();
+            count = count + 1;
+            println!("Got process stream {}", count);
+            handle_connection(stream, &html);
+        }
+    });
+
+    println!("Started listening");
+    for stream in listener.incoming() {
+        println!("Go incoming stream");
+        tx.send(stream.unwrap()).unwrap();
     }
 }
 
