@@ -11,6 +11,7 @@
       "cargo": {
         "args": [
           "build",
+          "--manifest-path=rust/webserver/Cargo.toml",
           "--bin=webserver",
           "--package=webserver"
         ],
@@ -20,7 +21,7 @@
         }
       },
       "args": [],
-      "cwd": "${workspaceFolder}"
+      "cwd": "${workspaceRoot}/rust/webserver"
     },
     {
       "type": "lldb",
@@ -39,7 +40,7 @@
         }
       },
       "args": [],
-      "cwd": "${workspaceFolder}"
+      "cwd": "${workspaceFolder}/rust/webserver"
     }
   ]
 }

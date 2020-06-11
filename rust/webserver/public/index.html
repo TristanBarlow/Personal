@@ -3,13 +3,28 @@
 </div>
 
 <script>
-  const data = []
-  for (let i = 0; i < 1000; i++) {
-    data.push("Big data")
-    fetch('/foobar', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    }).then(console.log).catch(console.error)
+  function stressTest() {
+    const data = ["foo bar", "foobar"]
+    const ps = []
+    for (let i = 0; i < 1000; i++) {
+      ps.push(fetch('/foobar', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }).catch(console.error))
+    }
+    Promise.all(ps).then(x => {
+      console.log(`Success`, x.filter(Boolean).length, 'Total:', x.length)
+    })
   }
 
+  async function bodyOfData() {
+    const res = await fetch('/foobar', {
+      method: 'POST',
+      body: JSON.stringify({ data: '100', fo: 1 })
+    })
+
+    console.log(await res.json())
+  }
+
+  bodyOfData()
 </script>

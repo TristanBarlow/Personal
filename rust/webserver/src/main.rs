@@ -1,53 +1,37 @@
-use futures::executor::block_on;
+use futures::executor::*;
 use std::fs;
-use std::future::Future;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpListener;
 use std::net::TcpStream;
-use std::sync::mpsc;
-use std::thread;
+use std::{thread, time};
 
 fn main() {
     let listener = TcpListener::bind("localhost:7878").unwrap();
     let html = fs::read_to_string("public/index.html").unwrap();
-    let (tx, rx): (mpsc::Sender<TcpStream>, mpsc::Receiver<TcpStream>) = mpsc::channel();
 
-    thread::spawn(move || {
-        println!("Started processor thread");
-        let mut count = 0;
-        loop {
-            let mut stream = rx.recv().unwrap();
-            count = count + 1;
-            println!("Got process stream {}", count);
-            handle_connection(stream, &html);
-        }
-    });
-
-    println!("Started listening");
-    for stream in listener.incoming() {
-        println!("Go incoming stream");
-        tx.send(stream.unwrap()).unwrap();
+    let pool = ThreadPool::new().unwrap();
+    loop {
+        let stream = listener.accept().unwrap();
+        pool.spawn_ok(handle_connection(stream.0, html.clone()));
     }
 }
 
-fn handle_connection(mut stream: TcpStream, html: &String) {
-    let mut request = String::new();
+async fn handle_connection(mut stream: TcpStream, html: String) {
+    let request = String::new();
     let mut b = BufReader::new(&stream);
 
     loop {
         let mut line = String::new();
         b.read_line(&mut line).expect("Could not read line");
+        println!("Line: {}", line);
         if line == "\r\n" || line == "\n\r" {
-            println!("Finished reading request");
+            println!("End of Request");
             break;
         }
     }
 
-    println!("{}", request);
     let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", html);
-
-    println!("WRITING RESPONSE");
     stream.write_all(response.as_bytes()).unwrap();
     stream.flush().unwrap();
 }
