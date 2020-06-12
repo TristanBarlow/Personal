@@ -4,7 +4,6 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpListener;
 use std::net::TcpStream;
-use std::{thread, time};
 
 fn main() {
     let listener = TcpListener::bind("localhost:7878").unwrap();
@@ -18,12 +17,13 @@ fn main() {
 }
 
 async fn handle_connection(mut stream: TcpStream, html: String) {
-    let request = String::new();
+    let mut request = String::new();
     let mut b = BufReader::new(&stream);
 
     loop {
         let mut line = String::new();
         b.read_line(&mut line).expect("Could not read line");
+        request = request + &line;
         println!("Line: {}", line);
         if line == "\r\n" || line == "\n\r" {
             println!("End of Request");
