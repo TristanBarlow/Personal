@@ -77,10 +77,10 @@ impl Chip8 {
     }
   }
 
-  fn math_op(&mut self, opcode:u16){
-     match opcode & 0x000F{
-      0x0=>self.V[0]
-     }
+  fn math_op(&mut self, opcode: u16) {
+    match opcode & 0x000F {
+      _ => println!("Could not find maths opcode : 0x{}", opcode),
+    }
   }
 
   pub fn emulate(&mut self) {
@@ -107,7 +107,7 @@ impl Chip8 {
         self.program_counter = opcode & 0x0FFF;
       }
       //Maths
-      0x8000 => self.math_op(opcode)
+      0x8000 => self.math_op(opcode),
       _ => println!("Opcode not found: 0x{}", opcode),
     }
 
@@ -131,7 +131,5 @@ impl Chip8 {
     return false;
   }
 
-  pub fn set_keys(&self) {
-    println!("setting keys");
-  }
+  pub fn set_keys(&self) {}
 }

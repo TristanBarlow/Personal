@@ -1,16 +1,19 @@
 mod chip8;
+mod render;
+mod terminal;
 use std::{thread, time};
 
 fn main() {
   let mut chip = chip8::make();
   chip.init();
   chip.load();
+
+  let gfx = terminal::new(100, 100);
   loop {
     let strt = time::SystemTime::now();
     chip.emulate();
-    if chip.draw() {
-      println!("Drawing");
-    }
+    if chip.draw() {}
+    gfx.render(vec![true, true, true]);
 
     chip.set_keys();
 
