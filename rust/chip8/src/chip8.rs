@@ -1,6 +1,9 @@
+use std::fs::File;
+use std::io::Read;
+
 pub struct Chip8 {
   memory: [u8; 4096],
-  V: [char; 16],
+  V: [i8; 16],
   gfx: [bool; 64 * 32],
   delay_timer: u16,
   sound_timer: u16,
@@ -14,7 +17,7 @@ pub struct Chip8 {
 pub fn make() -> Chip8 {
   return Chip8 {
     memory: [0; 4096],
-    V: ['0'; 16],
+    V: [0; 16],
     gfx: [false; 64 * 32],
     delay_timer: 0,
     sound_timer: 0,
@@ -50,17 +53,74 @@ impl Chip8 {
     self.program_counter = 0x200;
     self.I = 0;
     self.stack_pointer = 0;
+    self.V = [0; 16];
+    self.stack = [0; 16];
+    self.gfx = [false; 64 * 32];
+    self.memory = [0; 4096];
     for i in 0..80 {
       self.memory[i] = chip8_fontset[i];
     }
     println!("initialised chip8!");
   }
 
-  pub fn emulate(&self) {
+  pub fn load_game(&mut self, path: &str) {
+    let mut file = File::open(path).expect("Could load game from file");
+    let mut buff: Vec<u8> = vec![];
+    let size = file
+      .read_to_end(&mut buff)
+      .expect("Failed to game file into buffer");
+
+    println!("Read {} bytes into buffer", size);
+
+    for i in 0..buff.len() {
+      self.memory[i + 0x200] = buff[i];
+    }
+  }
+
+  fn math_op(&mut self, opcode:u16){
+     match opcode & 0x000F{
+      0x0=>self.V[0]
+     }
+  }
+
+  pub fn emulate(&mut self) {
     let pc = self.program_counter as usize;
     //opcodes take up two bytes
     let opcode: u16 = (self.memory[pc] as u16) << 8 | (self.memory[pc + 1] as u16);
-    println!("emulating");
+    //get first 4 bits
+    match opcode & 0xF000 {
+      0x0000 => match opcode & 0x000F {
+        // Clear screen
+        0 => self.gfx = [false; 64 * 32],
+        //return from subroutine
+        0xE => println!("Return from subroutine"),
+        _ => println!("Opcode starting with 0 not found opcode: 0x{}", opcode),
+      },
+      0xA000 => {
+        self.I = opcode & 0x0FFF;
+        self.program_counter += 2;
+      }
+      //Jump to subroutine
+      0x2000 => {
+        self.stack[self.stack_pointer as usize] = self.program_counter;
+        self.stack_pointer += 1;
+        self.program_counter = opcode & 0x0FFF;
+      }
+      //Maths
+      0x8000 => self.math_op(opcode)
+      _ => println!("Opcode not found: 0x{}", opcode),
+    }
+
+    if self.delay_timer > 0 {
+      self.delay_timer -= 1;
+    }
+
+    if self.sound_timer > 0 {
+      if self.sound_timer == 1 {
+        println!("beeep");
+      }
+      self.sound_timer -= 1;
+    }
   }
 
   pub fn load(&self) {
