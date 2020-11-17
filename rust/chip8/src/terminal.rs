@@ -19,21 +19,26 @@ impl Terminal_Renderer {
   fn clear(&self) {
     print!("{}[2J", 27 as char);
   }
-  pub fn render(&self, pixels: Vec<bool>) {
-    if let Some((w, h)) = term_size::dimensions() {
-      println!("Width: {}\nHeight: {}", w, h);
-    } else {
-      println!("Unable to get term size :(")
-    }
 
+  pub fn term_width_height(&self) -> (usize, usize) {
+    let (w, h) = term_size::dimensions().expect("Error getting terminal dimensions");
+    return (w, h);
+  }
+
+  pub fn render(&self, pixels: &Vec<bool>) {
+    self.clear();
+    let (w, h) = self.term_width_height();
     let mut out = String::new();
-    for pixel in pixels {
-      if pixel {
+    for (i, pixel) in pixels.iter().enumerate() {
+      if *pixel {
         out = out.add("\u{2588}");
+      }
+
+      if i != 0 && w / h % i == 0 {
+        out = out.add("\n");
       }
     }
 
     println!("{}", out);
-    self.clear();
   }
 }
