@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Route, Switch, BrowserRouter,  } from 'react-router-dom'
 import Home from './pages/Home'
 import Contact from './pages/Contact'
@@ -24,6 +24,9 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export default function App () {
+  useEffect(()=>{
+    import('rust-wasm').then(x=> x.greet("oooooo"))
+  },[])
   return (
     <div>
       <Background color='hsl(0, 0%, 96%)' />

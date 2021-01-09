@@ -33,7 +33,8 @@
     "@types/react-router": "^5",
     "@types/react-router-dom": "^5",
     "customize-cra": "^1.0.0",
-    "react-app-rewired": "^2.1.6"
+    "react-app-rewired": "^2.1.6",
+    "wasm-loader": "^1.3.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
