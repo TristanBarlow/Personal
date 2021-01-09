@@ -1,4 +1,4 @@
-FROM node:12-slim
+FROM public.ecr.aws/lambda/nodejs:12
 
 ENV MODE prod
 
@@ -9,4 +9,5 @@ RUN yarn
 RUN yarn build 
 WORKDIR /usr/src/app/server
 # Run the web service on container startup.
-CMD ["yarn", "ts-node", "src/index.ts" ]
+
+CMD [ "handler" ]
