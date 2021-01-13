@@ -1,21 +1,34 @@
 import React, { useEffect, useState } from 'react'
 import { Flex } from '@chakra-ui/react'
-import { MyCanvas } from '../ts/canvas'
-import { Waveform } from '../ts/waveform/'
 import Button from '../components/Button'
+import { makeModel } from '../ts/waveform'
+import { MyCanvas } from '../ts/canvas'
 
 export default function WaveFormCollapse ()   {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>()
   const [refresh, setRefresh] = useState(false)
   useEffect(()=>{
     if(canvas) {
-      new Waveform(50, 50).draw(new MyCanvas(canvas))
+      
+      let timeout:any
+      const m = makeModel()
+      const c = new MyCanvas(canvas)
+      const run = () => setTimeout(()=> {
+        m.iterate()
+        m.draw(c)
+        if(m.isDone){
+          console.log('Finsihed')
+        }
+        timeout = run()
+      }, 1)
+      run()
+      return () =>  clearTimeout(timeout)
     }
   },[canvas, refresh])
   return (
-    <Flex>
-      <Button click={()=> setRefresh(!refresh)}/>
-      <canvas ref={setCanvas}/>
+    <Flex flexDir="column">
+      <Button w="fit-content" mb={2} label="refresh" click={()=> setRefresh(!refresh)}/>
+      <canvas style={{ width: '1000px', height: '1000px' }} ref={setCanvas}/>
     </Flex>
   )
 }

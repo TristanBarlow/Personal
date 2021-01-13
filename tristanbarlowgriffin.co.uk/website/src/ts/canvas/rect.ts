@@ -3,7 +3,7 @@ export class Rect {
 
   }
 
-  static n(x:number, y:number, w:number, h:number){
+  static n(x = 1, y = 1, w = 1, h = 1){
     return new Rect(x, y, w, h)
   }
 }

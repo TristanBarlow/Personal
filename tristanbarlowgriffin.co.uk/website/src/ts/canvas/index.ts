@@ -13,6 +13,8 @@ export class MyCanvas {
       throw Error(`Could not get 2d context`)
     }
     
+    this.canvasEle.width = this.canvasEle.getBoundingClientRect().width
+    this.canvasEle.height = this.canvasEle.getBoundingClientRect().height
     this.canvas = canvas
   }
 
