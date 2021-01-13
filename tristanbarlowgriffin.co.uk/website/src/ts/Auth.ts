@@ -3,8 +3,8 @@ import { apiRequest } from './request'
 export type AuthListner = ((isAuthed: boolean) => void)
 export class Auth {
   private static _inst: Auth
-  private _key: string = ''
-  private _isAuthed: boolean = false
+  private _key = ''
+  private _isAuthed = false
   private authStateListners: { [id: string]: AuthListner } = {}
 
   static get inst (): Auth {
@@ -52,5 +52,4 @@ export class Auth {
     return this._isAuthed
   }
 
-  private constructor () { }
 }

@@ -37,7 +37,7 @@ export default function ImageManager () {
         style={ { width: 'fit-content' } }
         className="button is-primary">
         Upload New Image
-          </Button>
+      </Button>
 
       <Flex w="100%" flexWrap="wrap" py={ 2 }>
         {

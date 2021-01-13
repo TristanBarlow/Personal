@@ -13,6 +13,7 @@ import Login from './components/Login'
 import { Flex } from '@chakra-ui/react'
 import { createBrowserHistory } from 'history'
 import ReactGA from 'react-ga'
+import WaveForm from './pages/WaveFormCollapse'
 
 const history = createBrowserHistory()
 if (process.env.NODE_ENV === 'production') {
@@ -36,6 +37,7 @@ export default function App () {
               <Route path="/projects/:pId" component={ ProjectView } />
               <Route path="/projects" component={ Projects } />
               <Route path="/chess" component={ ChessPage } />
+              <Route path="/wave" component={ WaveForm } />
               <Route path="/admin/login" component={ Login } />
               <Route path="/admin" component={ Manage } />
               <Route path="/" component={ Home } />

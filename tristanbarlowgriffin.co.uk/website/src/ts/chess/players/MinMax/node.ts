@@ -36,18 +36,18 @@ export class MiniMacsNode {
     }
 
     let best_move: string | null = null
-    let fen = this.game.fen()
-    let moves = shuffle(this.game.moves(true))
+    const fen = this.game.fen()
+    const moves = shuffle(this.game.moves(true))
     let best_value = isMaxing ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY
 
     for (let i = 0; i < moves.length; i++) {
-      let move = moves[i]
+      const move = moves[i]
       this.moveCount++
       if (!this.game.move(move)) {
         console.log("move failed")
       }
 
-      let value = this.NewLayer(depth - 1, !isMaxing, a, b)
+      const value = this.NewLayer(depth - 1, !isMaxing, a, b)
 
       if (isMaxing) {
         if (value > best_value) {
@@ -92,7 +92,7 @@ export class MiniMacsNode {
         const column = board[i][y]
         if (!column) continue
 
-        let val = MINIMAX_VALS[column.type]
+        const val = MINIMAX_VALS[column.type]
         if (column.color === 'w') w += val
         else b += val
       }

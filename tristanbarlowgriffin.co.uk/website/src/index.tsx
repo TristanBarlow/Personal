@@ -8,11 +8,11 @@ import { ThemeProvider } from '@emotion/react'
 
 
 ReactDOM.render(
-    <ThemeProvider theme={ myTheme }>
-        <App />
-    </ThemeProvider>
-    ,
-    document.getElementById('root'))
+  <ThemeProvider theme={ myTheme }>
+    <App />
+  </ThemeProvider>
+  ,
+  document.getElementById('root'))
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

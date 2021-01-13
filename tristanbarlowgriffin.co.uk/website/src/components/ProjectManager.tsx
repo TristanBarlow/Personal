@@ -43,7 +43,7 @@ export default function ProjectManager () {
         style={ { width: 'fit-content' } }
         className="button is-primary">
         Upload New Project
-          </button>
+      </button>
       <Grid py={ 1 } w="100%" rowGap={ 1 } columnGap={ 2 } templateColumns="repeat(auto-fill, 350px)">
         {
           projects.map(x =>

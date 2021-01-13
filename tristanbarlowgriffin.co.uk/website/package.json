@@ -41,7 +41,10 @@
     "test": "react-app-rewired test"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app",
+      "../.eslintrc"
+    ]
   },
   "browserslist": {
     "production": [
