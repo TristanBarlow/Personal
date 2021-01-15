@@ -18,8 +18,6 @@ export const terrains: Terrain[] = [
   { colour: Colour.n(0, 0, 1), type: 'S' },
 ]
 
-const white = Colour.n()
-
 type TerrainMap = {[id:string]: Terrain}
 export const terrainMap: TerrainMap = terrains.reduce<TerrainMap>((current, next)=> {
   current[next.type] = next
@@ -43,11 +41,14 @@ export class Model {
     }
   }
 
-  iterate() {
+  iterate(): boolean {
     const pos = this.waveFunction.minEntropyPos
+    if(!pos){
+      return false
+    }
     this.waveFunction.collapse(pos.x, pos.y)
     this.propagate(pos)
-    this.tiles = this.waveFunction.getAsTiles()
+    return true
   }
 
   propagate(pos: Vec){
@@ -71,36 +72,50 @@ export class Model {
 
   draw(canvas: MyCanvas){
     canvas.clear()
-    this.tiles.forEach(({ pos, tile })=> {
-      canvas.drawRect(Rect.n(pos.x * 10, pos.y * 10, 10, 10), terrainMap[tile]?.colour || white)
+    this.waveFunction.iterateTiles((x, y, o)=>{      
+      let i = 0
+      const options = o.map(x=> x.split(','))
+      const { patternSize } = this.settings
+      for(let y2= y; y2 < y + patternSize; y2++){
+        for(let x2 = x; x2 < x + patternSize; x2++){
+          const c = Colour.n(0,0,0,0)
+          let validOps = 0
+          options.forEach(pattern => {
+            const p = pattern[i]
+            if(!terrainMap[pattern[i]]){
+              console.log('no key')
+              return
+            }
+            validOps++
+            c.add(terrainMap[pattern[i]].colour)
+          })   
+
+          canvas.drawRect(Rect.n(x2 * 10, y2 * 10, 10, 10), c.scale(1/validOps))
+          i++
+        }
+      }
     })
   }
 }
 
 
 export function makeModel(){
-  const [weights, rules] = makeRules([
-    ['L','L','L','L'],
-    ['L','L','L','L'],
-    ['L','L','L','L'],
-    ['L','C','C','L'],
-    ['C','S','S','C'],
-    ['S','S','S','S'],
-    ['S','S','S','S'],
-  ],
-  [
+  const [weights, rules] = makeRules(2, [
     ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-    ['S','S','S','S', 'S', 'C', 'S', 'S', 'S', 'S'],
-    ['S','S','S','C', 'C', 'M', 'C', 'C', 'S', 'S'],
+    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+    ['S','S','S','S', 'C', 'S', 'S', 'S', 'S', 'S'],
+    ['S','S','S','C', 'M', 'C', 'C', 'S', 'S', 'S'],
+    ['S','S','S','C', 'M', 'M', 'C', 'C', 'S', 'S'],
     ['S','S','S','C', 'M', 'M', 'M', 'C', 'S', 'S'],
-    ['S','S','S','C', 'M', 'M', 'M', 'C', 'S', 'S'],
-    ['S','S','S','C', 'M', 'M', 'M', 'C', 'S', 'S'],
-    ['S','S','S','C', 'M', 'M', 'M', 'C', 'S', 'S'],
-    ['S','S','S','C', 'C', 'M', 'C', 'C', 'S', 'S'],
+    ['S','S','S','C', 'C', 'M', 'M', 'C', 'C', 'S'],
+    ['S','S','S','S', 'C', 'M', 'C', 'C', 'S', 'S'],
     ['S','S','S','S', 'S', 'C', 'S', 'S', 'S', 'S'],
     ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
     ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  ])
+    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  ]
+  )
 
-  return new Model({ h: 50, w: 50, rules, weights, tileset: terrains.map(x=> x.type) })
+  return new Model({ h: 100, w: 100, rules, weights, patternSize: 2 })
 }

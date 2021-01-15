@@ -8,7 +8,7 @@ type Iter = (x: number, y: number, o:Option)=> (void | true)
 export interface WaveFunctionSettings{
   w: number
   h: number
-  tileset: string[]
+  patternSize: number
   rules: Rules
   weights: Weights
 }
@@ -17,17 +17,39 @@ export type OutTile = {pos:Vec, tile: string}
 export class WaveFunction {
   tiles: Options
 
+  get hPatterns(){
+    return this.settings.h / this.pSize
+  }
+
+  get wPatterns(){
+    return this.settings.w / this.pSize
+  }
+
   constructor(public readonly settings: WaveFunctionSettings){
     this.tiles = []
-    settings.tileset = settings.tileset.filter(x => this.weights[x])
-    const { w, h, tileset } = settings
-    for(let x = 0; x < w; x++) {
+    const tileset = Object.keys(settings.weights)
+    const { w, h, patternSize } = settings
+    for(let x = 0; x < w / patternSize; x++) {
       const row: string[][] = []
-      for(let y = 0 ; y < h; y++) {
+      for(let y = 0 ; y < h / patternSize; y++) {
         row.push(cloneDeep(tileset))
       }
       this.tiles.push(row)
     }
+  }
+
+  get pSize() {
+    return this.settings.patternSize
+  }
+
+  getPattern (x: number, y: number) {
+    const out = new Array(this.pSize * this.pSize)
+    for(let x = 0; x < this.pSize; x++){
+      for(let y = 0; y < this.pSize; y++){
+        out.push()
+      }
+    }
+    return out
   }
 
   isValidPos(x: number, y: number){
@@ -49,7 +71,8 @@ export class WaveFunction {
   }
 
   iterateTiles(iter: Iter){
-    const { w, h } = this.settings
+    const w = this.wPatterns
+    const h = this.hPatterns
     for(let x = 0; x < w; x++) {
       for(let y = 0 ; y < h; y++) {
         const stop = iter(x, y, this.tiles[y][x])
@@ -80,6 +103,7 @@ export class WaveFunction {
 
   collapse(x: number, y:number){
     const options = this.get(x,y)
+    if(options.length === 1) return
     let totalWeights = 0
     const items = options.map((o)=> {
       const w = this.getWeight(o)
@@ -100,15 +124,17 @@ export class WaveFunction {
   }
 
   constrain(pos: Vec, tile: string) {
-    this.set(pos.x, pos.y, this.get(pos.x, pos.y).filter(x => x !== tile))
+    const ops = this.get(pos.x, pos.y)
+    if(ops.length === 1) return
+    this.set(pos.x, pos.y, ops.filter(x => x !== tile))
   }
 
-  get minEntropyPos () {
+  get minEntropyPos (): Vec | null {
     let min = 0
-    let pos = Vec.n()
+    let pos: Vec | null = null
 
     this.iterateTiles((x, y, o)=>{
-      if(!o.length) return
+      if(o.length <= 1) return
       const e = this.entropy(x, y)
       if(e > min){
         min = e
@@ -116,7 +142,7 @@ export class WaveFunction {
       }
     })
 
-    return pos
+    return pos 
   }
 
   isFullyCollapsed () {
@@ -129,19 +155,6 @@ export class WaveFunction {
     })
 
     return isFinished
-  }
-
-  getAsTiles(){
-    const out:OutTile[] = []
-    this.iterateTiles((x, y, o)=>{
-      let tile = ''
-      if(o.length === 1){
-        tile = o[0]
-      }
-      out.push({ pos: Vec.n(x, y), tile })
-    })
-
-    return out
   }
 
   entropy(x: number, y: number, addNoise = true){

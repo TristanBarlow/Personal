@@ -1,7 +1,10 @@
+import { isValid } from 'date-fns'
 import { Vec } from '../canvas/vec'
 
 export class Rule {
-  constructor(public one: string, public two: string, public dir: Vec){}
+  constructor(public one: string, public two: string, public dir: Vec){
+    
+  }
   toString(){
     return Rule.toString(this.one, this.two, this.dir)
   }
@@ -12,6 +15,7 @@ export class Rule {
 }
 
 export class Rules {
+  constructor(private patternSize: number) {}
   private rules: {[id:string]: Rule} = {}
   addRule(r: Rule){
     return this.rules[r.toString()] = r
@@ -38,26 +42,49 @@ export function validLoc(x: number, y: number, arr: any[][]): boolean {
    && x < arr[y].length
 }
 
-export function makeRules(...inputs: (string[][])[]): [Weights, Rules] {
-  const rules = new Rules()
+export function makeRules(patternSize: number, ...inputs: (string[][])[]): [Weights, Rules] {
+  const rules = new Rules(patternSize)
   const weights: Weights = {}
+
+  const patternMap:{[id:string]:string} = {}
+  const getPattern = (x: number, y: number, input: string[][]) => {
+    const key = `${x}${y}`
+    if(patternMap[key]){
+      return patternMap[key]
+    } 
+
+
+    let out = ''
+    for(let y2 = y; y2 < y + patternSize; y2++){
+      for(let x2 = x; x2 < x + patternSize; x2++){
+        if(validLoc(x2, y2, input)){
+          out += `${out ? ',' : ''}${input[y2][x2]}`
+        } else {
+          return ''
+        }
+      }
+    }
+    return patternMap[key] = out
+  }
+
   inputs.forEach(input=>{
     for(let y = 0; y < input.length; y++){
       const row = input[y]
       for(let x = 0; x < row.length; x++){
-        const tile = row[x]
-        weights[tile] ? weights[tile]++ : weights[tile] = 1
+        const pattern = getPattern(x, y, input)
+        if(!pattern) continue
+        weights[pattern] ? weights[pattern]++ : weights[pattern] = 1
         dirs.forEach(d => {
           const ox = x + d.x
           const oy = y + d.y
-          if(validLoc(ox, oy, input)){
-            const other = input[oy][ox]
-            rules.addRule(new Rule(tile, other, d))
-          }
+          const otherPattern = getPattern(ox, oy, input)
+          if(!otherPattern) return
+          rules.addRule(new Rule(pattern, otherPattern, d))
         })
       }
     }
   })
 
+  console.log(weights)
   return [weights, rules]
 }

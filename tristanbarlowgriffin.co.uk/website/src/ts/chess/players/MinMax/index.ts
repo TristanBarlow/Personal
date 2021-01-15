@@ -6,7 +6,7 @@ type MoveWorker = typeof MinMaxWorker
 export class MinMaxBot extends ChessPlayer {
   name = PlayersTypes.MINMAX
   isHuman = false
-  statHistory: string = ''
+  statHistory = ''
   static _woker: MoveWorker
   get worker (): MoveWorker {
     if (!MinMaxBot._woker) {

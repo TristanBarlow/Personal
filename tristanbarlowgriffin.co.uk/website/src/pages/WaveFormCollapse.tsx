@@ -14,13 +14,14 @@ export default function WaveFormCollapse ()   {
       const m = makeModel()
       const c = new MyCanvas(canvas)
       const run = () => setTimeout(()=> {
+        console.log('Iter')
         m.iterate()
         m.draw(c)
         if(m.isDone){
           console.log('Finsihed')
         }
         timeout = run()
-      }, 1)
+      }, 100)
       run()
       return () =>  clearTimeout(timeout)
     }
