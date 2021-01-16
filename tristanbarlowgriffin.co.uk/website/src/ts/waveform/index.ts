@@ -1,7 +1,7 @@
 import { Colour, MyCanvas, Rect, Vec } from "../canvas"
 import './rule'
 import { makeRules } from "./rule"
-import { WaveFunctionSettings, WaveFunction, OutTile } from './waveFunction'
+import { WaveFunctionSettings, WaveFunction } from './waveFunction'
 
 type TerrainType = 'L' | 'M' | 'S' | 'C' | 'H' | 'None'
 
@@ -25,7 +25,6 @@ export const terrainMap: TerrainMap = terrains.reduce<TerrainMap>((current, next
 }, {} as any)
 
 export class Model {
-  private tiles: OutTile[] = []
   private waveFunction: WaveFunction
   constructor(public readonly settings: WaveFunctionSettings){
     this.waveFunction = new WaveFunction(settings)
@@ -60,8 +59,12 @@ export class Model {
       const adjecent = this.waveFunction.getAdjacent(cPos)
       adjecent.forEach(({ aPos ,dir }) =>{
         const aOps = this.waveFunction.get(aPos.x, aPos.y)
+        if(aOps.length === 1){
+          return
+        }
+
         aOps.forEach(tile =>{
-          if (!curTiles.some(curTile => this.settings.rules.check(curTile, tile, dir))){
+          if (!curTiles.some(curTile => this.settings.inputModel.check(curTile, tile, dir))){
             this.waveFunction.constrain(aPos, tile)
             stack.push(aPos)
           }
@@ -100,22 +103,22 @@ export class Model {
 
 
 export function makeModel(){
-  const [weights, rules] = makeRules(2, [
+  const inputModel = makeRules(2, [
     ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
     ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-    ['S','S','S','S', 'C', 'S', 'S', 'S', 'S', 'S'],
+    ['S','S','S','C', 'C', 'C', 'S', 'S', 'S', 'S'],
     ['S','S','S','C', 'M', 'C', 'C', 'S', 'S', 'S'],
     ['S','S','S','C', 'M', 'M', 'C', 'C', 'S', 'S'],
     ['S','S','S','C', 'M', 'M', 'M', 'C', 'S', 'S'],
     ['S','S','S','C', 'C', 'M', 'M', 'C', 'C', 'S'],
     ['S','S','S','S', 'C', 'M', 'C', 'C', 'S', 'S'],
-    ['S','S','S','S', 'S', 'C', 'S', 'S', 'S', 'S'],
-    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+    ['S','S','S','S', 'S', 'C', 'C', 'S', 'S', 'S'],
+    ['S','S','S','S', 'S', 'S', 'C', 'S', 'S', 'S'],
     ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
     ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
     ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
   ]
   )
 
-  return new Model({ h: 100, w: 100, rules, weights, patternSize: 2 })
+  return new Model({ h: 100, w: 100, inputModel, patternSize: 2 })
 }

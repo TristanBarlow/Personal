@@ -3,6 +3,13 @@ export class Vec {
     
   }
 
+  static rotAnti(v: Vec){
+    return Vec.n(v.y, -v.x)
+  }
+
+  static reflectY(v:Vec){
+    return Vec.n(v.x * - 1, v.y)
+  }
 
   eq(b: Vec){
     return this.x === b.x && this.y === b.y

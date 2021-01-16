@@ -1,4 +1,4 @@
-import { Rules, Weights, dirs } from "./rule"
+import { InputModel, dirs } from "./rule"
 import { cloneDeep } from 'lodash'
 import { Vec } from "../canvas"
 
@@ -9,25 +9,24 @@ export interface WaveFunctionSettings{
   w: number
   h: number
   patternSize: number
-  rules: Rules
-  weights: Weights
+  inputModel: InputModel
 }
 type Adj = {aPos:Vec, dir: Vec}
 export type OutTile = {pos:Vec, tile: string}
 export class WaveFunction {
   tiles: Options
 
-  get hPatterns(){
+  get hPatterns() {
     return this.settings.h / this.pSize
   }
 
-  get wPatterns(){
+  get wPatterns() {
     return this.settings.w / this.pSize
   }
 
   constructor(public readonly settings: WaveFunctionSettings){
     this.tiles = []
-    const tileset = Object.keys(settings.weights)
+    const tileset = Object.keys(this.weights)
     const { w, h, patternSize } = settings
     for(let x = 0; x < w / patternSize; x++) {
       const row: string[][] = []
@@ -82,11 +81,11 @@ export class WaveFunction {
   }
 
   get rules () {
-    return this.settings.rules
+    return this.settings.inputModel.rules
   }
 
   get weights () {
-    return this.settings.weights
+    return this.settings.inputModel.weights
   }
 
   get(x:number, y:number){
@@ -103,7 +102,6 @@ export class WaveFunction {
 
   collapse(x: number, y:number){
     const options = this.get(x,y)
-    if(options.length === 1) return
     let totalWeights = 0
     const items = options.map((o)=> {
       const w = this.getWeight(o)
@@ -125,7 +123,6 @@ export class WaveFunction {
 
   constrain(pos: Vec, tile: string) {
     const ops = this.get(pos.x, pos.y)
-    if(ops.length === 1) return
     this.set(pos.x, pos.y, ops.filter(x => x !== tile))
   }
 
@@ -142,13 +139,18 @@ export class WaveFunction {
       }
     })
 
+    if(!pos){
+      console.log('NOUT')
+      return null
+    }
+
     return pos 
   }
 
   isFullyCollapsed () {
     let isFinished = true
     this.iterateTiles((x, y, o)=>{
-      if(o.length !== 1) {
+      if(o.length > 1) {
         isFinished = false
         return true
       }
@@ -167,6 +169,6 @@ export class WaveFunction {
     })
 
     const entropy = Math.log(sumOfWeights) - (sumOfWeightsLog / sumOfWeights)
-    return addNoise ? entropy + (Math.random() / 1000) : entropy 
+    return addNoise ? entropy + (Math.random() / 10000) : entropy 
   }
 }

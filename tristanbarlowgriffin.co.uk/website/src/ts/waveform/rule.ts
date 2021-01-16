@@ -1,10 +1,78 @@
-import { isValid } from 'date-fns'
+import { clone } from 'lodash'
 import { Vec } from '../canvas/vec'
 
-export class Rule {
-  constructor(public one: string, public two: string, public dir: Vec){
-    
+function join(out:string, add:string){
+  return `${out ? ',' : ''}${add}`
+}
+
+function rotatePattern(pattern: string, patternSize: number){
+  const parts = pattern.split(',')
+  let out = ''
+  for(let y = 0; y < patternSize; y++){
+    for(let x = 0; x < patternSize; x++){
+      out += join(out, parts[patternSize - 1 - y + x * patternSize])
+    }
   }
+  return out
+}
+
+function reflectPattern (pattern: string, patternSize: number){
+  const parts = pattern.split(',')
+  let out = ''
+  for(let y = 0; y < patternSize; y++){
+    for(let x = 0; x < patternSize; x++){
+      out += join(out, parts[patternSize - 1 - x + y * patternSize])
+    }
+  }
+  return out
+}
+
+function arrToPatter(input: string[][]){
+  let out = ''
+  for(let y = 0; y < input.length; y++){
+    const row = input[y]
+    for(let x = 0; x < row.length; x++){
+      out += join(out, input[y][x])
+    }
+  }
+  return out
+}
+
+function rotateClockWise(matrix: string[][]) {
+  const size = matrix.length
+  const out = clone(matrix)
+
+  for (let i = 0; i < size; ++i) 
+    for (let j = 0; j < size; ++j) 
+      out[i][j] = matrix[size - j - 1][i] //***
+
+  return out
+}
+
+export class Rule {
+  constructor(public one: string, public two: string, public dir: Vec, private patternSize: number){
+  } 
+
+  madeAdditionalRules (): Rule[] {
+    const rotateOne = rotatePattern(this.one,  this.patternSize)
+    const rotateTwo = rotatePattern(this.two,  this.patternSize)
+    const rotateVec = Vec.rotAnti(this.dir)
+
+    const reflectOne = reflectPattern(this.one,  this.patternSize)
+    const reflectTwo = reflectPattern(this.two,  this.patternSize)
+    const reflectDir = Vec.reflectY(this.dir)
+
+    const reflectRotateOne = reflectPattern(rotateOne, this.patternSize)
+    const reflectRotateTwo = reflectPattern(rotateTwo, this.patternSize)
+    const reflectRotateDir = Vec.reflectY(rotateVec)
+
+    return [
+      new Rule(rotateOne, rotateTwo, rotateVec, this.patternSize),
+      new Rule(reflectOne, reflectTwo, reflectDir, this.patternSize),
+      new Rule(reflectRotateOne, reflectRotateTwo, reflectRotateDir, this.patternSize),
+    ]
+  }
+
   toString(){
     return Rule.toString(this.one, this.two, this.dir)
   }
@@ -14,11 +82,29 @@ export class Rule {
   }
 }
 
-export class Rules {
+export class InputModel {
   constructor(private patternSize: number) {}
-  private rules: {[id:string]: Rule} = {}
+  public rules: {[id:string]: Rule} = {}
+  public weights:{[id:string]:number} = {}
+
   addRule(r: Rule){
+    if(this.rules[r.toString()]){
+      return
+    }
     return this.rules[r.toString()] = r
+  }
+
+  addWeight(pattern: string){
+    this.weights[pattern] ? this.weights[pattern]++ : this.weights[pattern] = 1
+  }
+
+  addAdditionalRules(){
+    for(const rule in this.rules){
+      this.rules[rule].madeAdditionalRules().forEach(r=>{
+        this.addRule(r)
+        this.addWeight(r.one)
+      })
+    }
   }
 
   check(one: string, two: string, dir: Vec){
@@ -42,9 +128,8 @@ export function validLoc(x: number, y: number, arr: any[][]): boolean {
    && x < arr[y].length
 }
 
-export function makeRules(patternSize: number, ...inputs: (string[][])[]): [Weights, Rules] {
-  const rules = new Rules(patternSize)
-  const weights: Weights = {}
+export function makeRules(patternSize: number, ...inputs: (string[][])[]): InputModel {
+  const inputModel = new InputModel(patternSize)
 
   const patternMap:{[id:string]:string} = {}
   const getPattern = (x: number, y: number, input: string[][]) => {
@@ -52,7 +137,6 @@ export function makeRules(patternSize: number, ...inputs: (string[][])[]): [Weig
     if(patternMap[key]){
       return patternMap[key]
     } 
-
 
     let out = ''
     for(let y2 = y; y2 < y + patternSize; y2++){
@@ -64,6 +148,7 @@ export function makeRules(patternSize: number, ...inputs: (string[][])[]): [Weig
         }
       }
     }
+
     return patternMap[key] = out
   }
 
@@ -73,18 +158,20 @@ export function makeRules(patternSize: number, ...inputs: (string[][])[]): [Weig
       for(let x = 0; x < row.length; x++){
         const pattern = getPattern(x, y, input)
         if(!pattern) continue
-        weights[pattern] ? weights[pattern]++ : weights[pattern] = 1
+        inputModel.addWeight(pattern)
         dirs.forEach(d => {
           const ox = x + d.x
           const oy = y + d.y
           const otherPattern = getPattern(ox, oy, input)
           if(!otherPattern) return
-          rules.addRule(new Rule(pattern, otherPattern, d))
+          inputModel.addRule(new Rule(pattern, otherPattern, d, patternSize))
         })
       }
     }
   })
 
-  console.log(weights)
-  return [weights, rules]
+  inputModel.addAdditionalRules()
+  console.log(inputModel)
+  return inputModel
 }
+
