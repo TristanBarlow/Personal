@@ -11,9 +11,9 @@ interface Terrain {
 }
 
 export const terrains: Terrain[] = [
-  { colour: Colour.n(0, 1, 0), type: 'L' },
+  { colour: Colour.n(0, .5, 0), type: 'L' },
   { colour: Colour.n(1, 0, 0), type: 'M' },
-  { colour: Colour.n(1, 1, 0), type: 'C' },
+  { colour: Colour.n(.4, .4, .2), type: 'C' },
   { colour: Colour.n(.5, .5, .5), type: 'H' },
   { colour: Colour.n(0, 0, 1), type: 'S' },
 ]
@@ -86,7 +86,6 @@ export class Model {
           options.forEach(pattern => {
             const p = pattern[i]
             if(!terrainMap[pattern[i]]){
-              console.log('no key')
               return
             }
             validOps++
@@ -103,22 +102,52 @@ export class Model {
 
 
 export function makeModel(){
-  const inputModel = makeRules(2, [
-    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-    ['S','S','S','C', 'C', 'C', 'S', 'S', 'S', 'S'],
-    ['S','S','S','C', 'M', 'C', 'C', 'S', 'S', 'S'],
-    ['S','S','S','C', 'M', 'M', 'C', 'C', 'S', 'S'],
-    ['S','S','S','C', 'M', 'M', 'M', 'C', 'S', 'S'],
-    ['S','S','S','C', 'C', 'M', 'M', 'C', 'C', 'S'],
-    ['S','S','S','S', 'C', 'M', 'C', 'C', 'S', 'S'],
-    ['S','S','S','S', 'S', 'C', 'C', 'S', 'S', 'S'],
-    ['S','S','S','S', 'S', 'S', 'C', 'S', 'S', 'S'],
-    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  ]
+  const inputModel = makeRules(2, 
+  // [
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','C', 'C', 'C', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','C', 'M', 'C', 'C', 'S', 'S', 'S'],
+  //   ['S','S','S','C', 'M', 'M', 'C', 'C', 'S', 'S'],
+  //   ['S','S','S','C', 'M', 'M', 'M', 'C', 'S', 'S'],
+  //   ['S','S','S','C', 'C', 'M', 'M', 'C', 'C', 'S'],
+  //   ['S','S','S','S', 'C', 'M', 'C', 'C', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'C', 'C', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'C', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  // ],
+  // [
+  //   ['S','S','C','L', 'M', 'M', 'L', 'C', 'S', 'S'],
+  //   ['S','S','C','L', 'L', 'L', 'L', 'C', 'S', 'S'],
+  //   ['S','S','C','L', 'L', 'L', 'L', 'C', 'S', 'S'],
+  //   ['S','S','S','C', 'C', 'C', 'C', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  // ],
+    [
+      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+      ['L','L','L','L', 'M', 'L', 'L', 'L', 'L', 'L'],
+      ['L','L','L','M', 'S', 'M', 'L', 'L', 'L', 'L'],
+      ['L','L','L','M', 'M', 'M', 'L', 'L', 'L', 'L'],
+      ['L','L','L','L', 'M', 'L', 'L', 'L', 'L', 'L'],
+      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+      ['C','C','C','C', 'C', 'C', 'C', 'C', 'C', 'C'],
+      ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+    ]
   )
 
-  return new Model({ h: 100, w: 100, inputModel, patternSize: 2 })
+  return new Model({ h: 200, w: 200, inputModel, patternSize: 3 })
 }

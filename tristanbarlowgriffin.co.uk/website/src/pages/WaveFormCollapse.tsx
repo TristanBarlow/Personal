@@ -3,13 +3,16 @@ import { Flex } from '@chakra-ui/react'
 import Button from '../components/Button'
 import { makeModel } from '../ts/waveform'
 import { MyCanvas } from '../ts/canvas'
+import  globe from '../assets/images/globe.jpg'
+import { getPixelData } from '../ts/canvas/getImageData'
 
 export default function WaveFormCollapse ()   {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>()
   const [refresh, setRefresh] = useState(false)
+
   useEffect(()=>{
     if(canvas) {
-      
+      getPixelData(globe)
       let timeout:any
       const m = makeModel()
       const c = new MyCanvas(canvas)
@@ -26,6 +29,7 @@ export default function WaveFormCollapse ()   {
       return () =>  clearTimeout(timeout)
     }
   },[canvas, refresh])
+
   return (
     <Flex flexDir="column">
       <Button w="fit-content" mb={2} label="refresh" click={()=> setRefresh(!refresh)}/>

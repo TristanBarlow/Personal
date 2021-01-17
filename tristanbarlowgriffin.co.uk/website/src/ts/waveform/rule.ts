@@ -131,13 +131,7 @@ export function validLoc(x: number, y: number, arr: any[][]): boolean {
 export function makeRules(patternSize: number, ...inputs: (string[][])[]): InputModel {
   const inputModel = new InputModel(patternSize)
 
-  const patternMap:{[id:string]:string} = {}
   const getPattern = (x: number, y: number, input: string[][]) => {
-    const key = `${x}${y}`
-    if(patternMap[key]){
-      return patternMap[key]
-    } 
-
     let out = ''
     for(let y2 = y; y2 < y + patternSize; y2++){
       for(let x2 = x; x2 < x + patternSize; x2++){
@@ -149,7 +143,7 @@ export function makeRules(patternSize: number, ...inputs: (string[][])[]): Input
       }
     }
 
-    return patternMap[key] = out
+    return out
   }
 
   inputs.forEach(input=>{
