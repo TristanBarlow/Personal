@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Flex } from '@chakra-ui/react'
 import Button from '../components/Button'
 import { makeModel, makeModelImage } from '../ts/waveform'
-import globe from '../assets/images/globe.jpg'
+import globe from '../assets/images/test.png'
 import { MyCanvas } from '../ts/canvas'
 
 export default function WaveFormCollapse ()   {
@@ -12,7 +12,7 @@ export default function WaveFormCollapse ()   {
   useEffect(()=>{
     if(canvas) {
       let timeout:any
-      makeModel().then((m)=>{
+      makeModelImage(globe).then((m)=>{
         if(!m){
           throw Error('Failed')
         }

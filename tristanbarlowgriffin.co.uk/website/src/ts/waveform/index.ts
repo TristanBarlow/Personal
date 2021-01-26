@@ -117,6 +117,6 @@ export async function makeModel(){
 export async function makeModelImage(src: string){
   const colours = await getPixelData(src)
   if(!colours) return
-  const inputModel = makeRules(1, colours)
-  return new Model({ h: 50, w: 50, inputModel, patternSize: 1 })
+  const inputModel = makeRules(2, colours)
+  return new Model({ h: 50, w: 50, inputModel, patternSize: 2 })
 }

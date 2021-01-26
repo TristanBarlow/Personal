@@ -18,10 +18,10 @@ export async function getPixelData(src: string){
   c.height = image.height
   canvas.drawImage(image, 0, 0)
   const { data } = canvas.getImageData(0, 0, image.width, image.height)
-  const arr: Colour[] = new Array(Math.ceil(data.length/3))
-  for(let i = 0; i < data.length/3; i++){
-    const startI = i * 3
-    arr[i] = new Colour(data[startI], data[startI+1], data[startI+2], 1)
+  const arr: Colour[] = new Array(Math.ceil(data.length/4))
+  for(let i = 0; i < data.length/4; i++){
+    const startI = i * 4
+    arr[i] = new Colour(data[startI], data[startI+1], data[startI+2], data[startI+3])
   }
 
   let i = 0
