@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Flex } from '@chakra-ui/react'
 import Button from '../components/Button'
-import { makeModel } from '../ts/waveform'
+import { makeModel, makeModelImage } from '../ts/waveform'
+import globe from '../assets/images/globe.jpg'
 import { MyCanvas } from '../ts/canvas'
-import  globe from '../assets/images/globe.jpg'
-import { getPixelData } from '../ts/canvas/getImageData'
 
 export default function WaveFormCollapse ()   {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>()
@@ -12,21 +11,24 @@ export default function WaveFormCollapse ()   {
 
   useEffect(()=>{
     if(canvas) {
-      getPixelData(globe)
       let timeout:any
-      const m = makeModel()
-      const c = new MyCanvas(canvas)
-      const run = () => setTimeout(()=> {
-        console.log('Iter')
-        m.iterate()
-        m.draw(c)
-        if(m.isDone){
-          console.log('Finsihed')
+      makeModel().then((m)=>{
+        if(!m){
+          throw Error('Failed')
         }
-        timeout = run()
-      }, 100)
-      run()
-      return () =>  clearTimeout(timeout)
+        const c = new MyCanvas(canvas)
+        const run = () => setTimeout(()=> {
+          console.log('Iter')
+          m.iterate()
+          m.draw(c)
+          if(m.isDone){
+            console.log('Finsihed')
+          }
+          timeout = run()
+        }, 100)
+        run()
+        return () =>  clearTimeout(timeout)
+      })
     }
   },[canvas, refresh])
 

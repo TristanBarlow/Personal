@@ -1,10 +1,17 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Me from '../assets/images/me.png'
 import LinkedIn from '../assets/images/linked-in.png'
 import GitHub from '../assets/images/git-hub.png'
 import MyHelmet from '../components/MyHelmet'
+import { getPixelData } from '../ts/canvas/getImageData'
+import  globe from '../assets/images/globe.jpg'
 
 export default function Home () {
+
+  useEffect(()=>{
+    getPixelData(globe).then(console.log)
+  },[])
+
   return (
     <div className="tile is-parent">
       <div className="title"></div>

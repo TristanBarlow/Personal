@@ -15,7 +15,7 @@ export class RandomBot extends ChessPlayer {
     this.lastNumberOfMoves = possibleMoves.length
     if (possibleMoves.length <= 0) return null
 
-    let randomIndex = Math.floor(Math.random() * possibleMoves.length)
+    const randomIndex = Math.floor(Math.random() * possibleMoves.length)
     const move = possibleMoves[randomIndex]
     return { move, rating: 1, timeTaken: timeTaken(strt), details: 'I picked randomly' }
   }

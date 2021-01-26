@@ -1,12 +1,13 @@
 import { clone } from 'lodash'
+import { Colour, ColourMap } from '../canvas'
 import { Vec } from '../canvas/vec'
 
 function join(out:string, add:string){
-  return `${out ? ',' : ''}${add}`
+  return `${out ? '.' : ''}${add}`
 }
 
 function rotatePattern(pattern: string, patternSize: number){
-  const parts = pattern.split(',')
+  const parts = pattern.split('.')
   let out = ''
   for(let y = 0; y < patternSize; y++){
     for(let x = 0; x < patternSize; x++){
@@ -17,7 +18,7 @@ function rotatePattern(pattern: string, patternSize: number){
 }
 
 function reflectPattern (pattern: string, patternSize: number){
-  const parts = pattern.split(',')
+  const parts = pattern.split('.')
   let out = ''
   for(let y = 0; y < patternSize; y++){
     for(let x = 0; x < patternSize; x++){
@@ -86,12 +87,21 @@ export class InputModel {
   constructor(private patternSize: number) {}
   public rules: {[id:string]: Rule} = {}
   public weights:{[id:string]:number} = {}
+  public colourMap: ColourMap = {}
 
   addRule(r: Rule){
     if(this.rules[r.toString()]){
       return
     }
     return this.rules[r.toString()] = r
+  }
+
+  addColour(r:Colour){
+    if(this.colourMap[r.toString()]){
+      return 
+    }
+
+    return this.colourMap[r.toString()] = r
   }
 
   addWeight(pattern: string){
@@ -128,15 +138,17 @@ export function validLoc(x: number, y: number, arr: any[][]): boolean {
    && x < arr[y].length
 }
 
-export function makeRules(patternSize: number, ...inputs: (string[][])[]): InputModel {
+export function makeRules(patternSize: number, ...inputs: (Colour[][])[]): InputModel {
   const inputModel = new InputModel(patternSize)
 
-  const getPattern = (x: number, y: number, input: string[][]) => {
+  const getPattern = (x: number, y: number, input: Colour[][]) => {
     let out = ''
     for(let y2 = y; y2 < y + patternSize; y2++){
       for(let x2 = x; x2 < x + patternSize; x2++){
         if(validLoc(x2, y2, input)){
-          out += `${out ? ',' : ''}${input[y2][x2]}`
+          const col = input[y2][x2].toString()
+          inputModel.colourMap[col]  = input[y2][x2]
+          out += `${out ? '.' : ''}${col}`
         } else {
           return ''
         }

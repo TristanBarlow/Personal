@@ -1,19 +1,38 @@
-export async function getPixelData(src: string){
-  const image = document.createElement('img')
-  image.src = src
-  await new Promise<void>((resolve) =>{
-    image.onload = () => {
-      console.log('Loaded')
-      resolve()
-    }
-  })
+import { Colour } from "./colour"
 
+export async function getPixelData(src: string){
+  const image =  new Image()
+  const prom = new Promise<void>((resolve) =>{
+    image.addEventListener('load', () => {
+      console.log('Loaded', image)
+      resolve()
+    }, false)
+  })
+  image.src = src
+
+  await prom
   const c = document.createElement('canvas') 
   const canvas = c.getContext("2d")
   if(!canvas) return
-
-  canvas.drawImage(image, image.width, image.height)
+  c.width = image.width
+  c.height = image.height
+  canvas.drawImage(image, 0, 0)
   const { data } = canvas.getImageData(0, 0, image.width, image.height)
-  data.forEach(console.log)
-  document.removeChild(c) 
+  const arr: Colour[] = new Array(Math.ceil(data.length/3))
+  for(let i = 0; i < data.length/3; i++){
+    const startI = i * 3
+    arr[i] = new Colour(data[startI], data[startI+1], data[startI+2], 1)
+  }
+
+  let i = 0
+  const out: Colour[][] = new Array(image.height)
+  for(let y = 0; y< image.height; y++){
+    const row = new Array(image.width)
+    out[y] = row
+    for(let x =0; x < image.width; x++){
+      row[x] = arr[i]
+      i++   
+    }
+  }
+  return out
 }

@@ -1,33 +1,27 @@
-import { Colour, MyCanvas, Rect, Vec } from "../canvas"
+import { Colour, ColourMap, MyCanvas, Rect, Vec } from "../canvas"
 import './rule'
 import { makeRules } from "./rule"
 import { WaveFunctionSettings, WaveFunction } from './waveFunction'
+import { getPixelData } from '../canvas/getImageData'
 
 type TerrainType = 'L' | 'M' | 'S' | 'C' | 'H' | 'None'
 
-interface Terrain {
-  type: TerrainType
-  colour: Colour
+export const terrains: ColourMap = {
+  'L': Colour.n(0, 125, 0),
+  'M': Colour.n(255, 0, 0),
+  'C': Colour.n(100, 100, 50),
+  'H': Colour.n(125, 125, 125),
+  'S': Colour.n(0, 0, 255),
 }
-
-export const terrains: Terrain[] = [
-  { colour: Colour.n(0, .5, 0), type: 'L' },
-  { colour: Colour.n(1, 0, 0), type: 'M' },
-  { colour: Colour.n(.4, .4, .2), type: 'C' },
-  { colour: Colour.n(.5, .5, .5), type: 'H' },
-  { colour: Colour.n(0, 0, 1), type: 'S' },
-]
-
-type TerrainMap = {[id:string]: Terrain}
-export const terrainMap: TerrainMap = terrains.reduce<TerrainMap>((current, next)=> {
-  current[next.type] = next
-  return current
-}, {} as any)
 
 export class Model {
   private waveFunction: WaveFunction
   constructor(public readonly settings: WaveFunctionSettings){
     this.waveFunction = new WaveFunction(settings)
+  }
+
+  get colourMap(){
+    return this.settings.inputModel.colourMap
   }
 
   get isDone(){
@@ -77,7 +71,7 @@ export class Model {
     canvas.clear()
     this.waveFunction.iterateTiles((x, y, o)=>{      
       let i = 0
-      const options = o.map(x=> x.split(','))
+      const options = o.map(x=> x.split('.'))
       const { patternSize } = this.settings
       for(let y2= y; y2 < y + patternSize; y2++){
         for(let x2 = x; x2 < x + patternSize; x2++){
@@ -85,11 +79,11 @@ export class Model {
           let validOps = 0
           options.forEach(pattern => {
             const p = pattern[i]
-            if(!terrainMap[pattern[i]]){
+            if(!this.colourMap[pattern[i]]){
               return
             }
             validOps++
-            c.add(terrainMap[pattern[i]].colour)
+            c.add(this.colourMap[pattern[i]])
           })   
 
           canvas.drawRect(Rect.n(x2 * 10, y2 * 10, 10, 10), c.scale(1/validOps))
@@ -100,54 +94,29 @@ export class Model {
   }
 }
 
+export async function makeModel(){
+  const colours =  [
+    ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+    ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+    ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+    ['L','L','L','L', 'M', 'L', 'L', 'L', 'L', 'L'],
+    ['L','L','L','M', 'S', 'M', 'L', 'L', 'L', 'L'],
+    ['L','L','L','M', 'M', 'M', 'L', 'L', 'L', 'L'],
+    ['L','L','L','L', 'M', 'L', 'L', 'L', 'L', 'L'],
+    ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+    ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+    ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
+    ['C','C','C','C', 'C', 'C', 'C', 'C', 'C', 'C'],
+    ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
+  ].map(row=> row.map(colour => terrains[colour]))
+  const inputModel = makeRules(2, colours)
 
-export function makeModel(){
-  const inputModel = makeRules(2, 
-  // [
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','C', 'C', 'C', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','C', 'M', 'C', 'C', 'S', 'S', 'S'],
-  //   ['S','S','S','C', 'M', 'M', 'C', 'C', 'S', 'S'],
-  //   ['S','S','S','C', 'M', 'M', 'M', 'C', 'S', 'S'],
-  //   ['S','S','S','C', 'C', 'M', 'M', 'C', 'C', 'S'],
-  //   ['S','S','S','S', 'C', 'M', 'C', 'C', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'C', 'C', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'C', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  // ],
-  // [
-  //   ['S','S','C','L', 'M', 'M', 'L', 'C', 'S', 'S'],
-  //   ['S','S','C','L', 'L', 'L', 'L', 'C', 'S', 'S'],
-  //   ['S','S','C','L', 'L', 'L', 'L', 'C', 'S', 'S'],
-  //   ['S','S','S','C', 'C', 'C', 'C', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  //   ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-  // ],
-    [
-      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
-      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
-      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
-      ['L','L','L','L', 'M', 'L', 'L', 'L', 'L', 'L'],
-      ['L','L','L','M', 'S', 'M', 'L', 'L', 'L', 'L'],
-      ['L','L','L','M', 'M', 'M', 'L', 'L', 'L', 'L'],
-      ['L','L','L','L', 'M', 'L', 'L', 'L', 'L', 'L'],
-      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
-      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
-      ['L','L','L','L', 'L', 'L', 'L', 'L', 'L', 'L'],
-      ['C','C','C','C', 'C', 'C', 'C', 'C', 'C', 'C'],
-      ['S','S','S','S', 'S', 'S', 'S', 'S', 'S', 'S'],
-    ]
-  )
+  return new Model({ h: 100, w: 100, inputModel, patternSize: 2 })
+}
 
-  return new Model({ h: 200, w: 200, inputModel, patternSize: 3 })
+export async function makeModelImage(src: string){
+  const colours = await getPixelData(src)
+  if(!colours) return
+  const inputModel = makeRules(1, colours)
+  return new Model({ h: 50, w: 50, inputModel, patternSize: 1 })
 }
